@@ -7,6 +7,15 @@ import  utils_date
 from utils_date import time_increment          #Uses Jeff's function time_increment Important to reference
 import datetime
 from datetime import timedelta
+#
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+
+
+mintempaverages=[]
+monthsofyear=[]
 
 #Coordinate Points (~Pendleton~)
 y=60
@@ -26,6 +35,9 @@ for m in range(0,num_months):
     ticker=0                                                    #Reset
     datanew=0                                                   #Reset
     
+    mm=int(new_date[4:6])                                       #Makes the month a number
+    monthsofyear.append(mm)                                     #Creates an array with the months 
+    
     filein=netCDF4.Dataset(newfile)                            #Calls file of desirec month & year
     mint = filein.variables['T2MIN']                           #Stores individual variable
     data = mint[:,y,x]                                         #Files into a month long array
@@ -39,3 +51,13 @@ for m in range(0,num_months):
         
     print('The average minimum temperature for '+ newYYYYMM +' is: '+str(average))
     startdate=new_date                                         #Start date must get updated to continue looping forward in time
+    mintempaverages.append(average)
+
+print(mintempaverages)
+fig, linepl = plt.subplots()
+#monthsofyear=[9, 10, 11, 12]
+linepl.plot(monthsofyear, mintempaverages)
+linepl.set(xlabel='Month', ylabel='Min Temp Avg (K)', title='Min Avg Temps of 2098 near Pendleton')
+linepl.grid()
+fig.savefig("test.png")
+plt.show()
