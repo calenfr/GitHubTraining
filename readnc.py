@@ -2,37 +2,9 @@
 
 import netCDF4
 import numpy as np
-from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/   #Dataset is the type
-
-#Coordinate Points (~Pendleton~)
-y=60
-x=90
-
-ticker=0
-datanew=0
-
-filein = netCDF4.Dataset('gfdl-cm3.2098090100.nc')         #Reads in specific file gfdl-cm3.2098090100.nc
-mint = filein.variables['T2MIN']                           #Stores individual variable
-data = mint[:,y,x]                                         #Files into a month long array
-#print(data)                                               #Use to check data points
-#print(mint.shape)                                         #Use to check array size
-#print(mint.dimensions)
-
-#for t in range(0,4) :                                     #Use for a smaller range than entire month
-
-for t in range(0,mint.shape[0]) :
-    datanew=data[ticker]+datanew
-    ticker=ticker+1                      
-
-average=datanew/ticker
-print(average)
-
-#!/usr/bin/python
-
-import netCDF4
-import numpy as np
-from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/   #Dataset is the type
+from netCDF4 import Dataset  # http://code.google.com/p/netcdf4-python/  
 import  utils_date
+from utils_date import time_increment          #Uses Jeff's function time_increment Important to reference
 import datetime
 from datetime import timedelta
 
@@ -40,40 +12,30 @@ from datetime import timedelta
 y=60
 x=90
 
-YearAverages=[]
-
-startdate = '2096080100'
-num_months = 2       #Change back to 30
-
-#print(time_increment(2096080100, 35, "%Y%m%d%H"))
+startdate = '2098080100'                       #Start at a date just prior to the month you want to calculate the average 
+num_months = 4                                 #Number of months incremented in the future. The num you want
+num_days = 35                                  #Days to increment forward to reach the next month
 
 for m in range(0,num_months):
-    
-    thisdate=(startdate)+datetime.timedelta(days=35)#days 35 & startdate
-    print(thisdate)
-    yyyy=thisdate[0,4]   
-    mm=thisdate[4,6]
-    newdate = str(yyyy)+str(mm)+"0100"
-    newfile = "gfdl-cm3."+newdate+".nc"
 
-    mmm=mm-1
+    new_date=(time_increment(startdate, num_days, "%Y%m%d%H"))  #Jeff's function. Passes the date, increment step, & format. Returns date
+    #print(new_date)
+    newYYYYMM=new_date[0:6]+'0100'                              #Cuts off extraneous day & hours
+    newfile='gfdl-cm3.'+newYYYYMM+'.nc'                         #Puts in actual file form needed
+    #print(newfile)
+    ticker=0                                                    #Reset
+    datanew=0                                                   #Reset
     
-    ticker=0
-    datanew=0
-    
-    filein=netCDF4.Dataset(newfile)
+    filein=netCDF4.Dataset(newfile)                            #Calls file of desirec month & year
     mint = filein.variables['T2MIN']                           #Stores individual variable
     data = mint[:,y,x]                                         #Files into a month long array
     
     
-   # for t in range(0,mint.shape[0]) :
-  #      datanew=data[ticker]+datanew
-   #     ticker=ticker+1                      
+    for t in range(0,mint.shape[0]) :
+        datanew=data[ticker]+datanew                           #Updates data count within month
+        ticker=ticker+1                                        #Updates days passed
         
-    #    average=datanew/ticker
-  #  YearAverages=YearAverages.append('The average TMin for {mmm} is: {average}')
-    #print(f'The average minimum temperature is: " average)
+    average=datanew/ticker                                     #Calculation
         
-
-
-#print(YearAverages)
+    print('The average minimum temperature for '+ newYYYYMM +' is: '+str(average))
+    startdate=new_date                                         #Start date must get updated to continue looping forward in time
